@@ -28,7 +28,8 @@ The `quorum-config.json` should be in the following format:
     "0x9186eb3d20cbd1f5f992a950d808c4495153abd5",
     "0x0638e1574728b6d862dd5d3a3e0942c3be47d996"
   ],
-  "makers": ["0xca843569e3427144cead5e4d5999a3d0ccf92b8e"]
+  "makers": ["0xca843569e3427144cead5e4d5999a3d0ccf92b8e"],
+  "owners": ["0x5d1370047cf530d6533ce18472d871c6714c2505"]
 }
 ```
 
