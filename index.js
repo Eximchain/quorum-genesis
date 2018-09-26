@@ -14,6 +14,39 @@ const OUTPUT = 'quorum-genesis.json';
 const VOTING_CONTRACT_ADDR = '0x0000000000000000000000000000000000000020';
 const GOVERNANCE_CONTRACT_ADDR = '0x000000000000000000000000000000000000002a';
 
+
+function toWei(ethAmount) {
+  return ethAmount.toString() + "000000000000000000"
+}
+const TOKENSUPPLY = 150000000;
+const EXIMCHAINESCROWAMOUNT = TOKENSUPPLY*0.4
+const EXIMCHAINESCROW = {"addresses": 
+  [
+    "0x5ffd8B1031b97f7b23FA0D0BF5faf594FC15dED8",
+    "0x05EbBD539cf3E017B86c33E83a904a669e6d3F68",
+    "0xE106755E59A26a0C87E83B6A507C1a456787bFd0",
+    "0xDd85F8Fe23F6b054Bce18Df725a07Cb24bb1e2FE",
+    "0xd919E37AF7cC1eA169dF9ea21215C2f5B5A215a6"
+  ]
+}
+//INCLUDES OUR BONUS ACCOUNT
+const TOKENSWAPESCROWAMOUNT = TOKENSUPPLY*0.5 
+const TOKENSWAPESCROW = {"addresses": 
+  [
+    "0x3E32c75e53bcbE5EA694Df7aDAe88D24Ce5dd52c",
+    "0x179445629addE906A9AC2f3710ff9BEa2F7A41Ad",
+    "0xcFc19f53bb1C0289a2B9296e9eC1968F045f542F"
+  ]
+}
+//TO BE DISTRIBUTED TO VALIDATORS AND OWNERS TO ADMINISTER THE NETWORK
+const RESERVEESCROWAMOUNT = TOKENSUPPLY*0.1
+const RESERVEESCROW = {"addresses": 
+  [
+    "0x7c8c01532d15Ce0BEa5cdff2A752188Ffa3C0079"
+  ]
+}
+
+
 function padIndex(number, prefix) {
   if(prefix) {
     return utils.addHexPrefix(utils.setLengthLeft([number], 32, false).toString('hex'));
@@ -54,15 +87,32 @@ function buildGovernanceStorage(input){
 }
 
 function fundAddresses(input) {
-  let all = uniq(input.makers
-    .concat(input.voters)
-    .concat(input.fundedObservers)
-    .concat(input.owners));
-  for(let i=0; i<all.length; i++) {
-    template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
+
+  //DISTRIBUTE OPERATIONAL RESERVES
+  let reserveAddresses = uniq(input.voters
+    .concat(input.owners)
+    .concat(RESERVEESCROW.addresses));
+  let reserveAmount = RESERVEESCROWAMOUNT/reserveAddresses.length
+  for(let i=0; i<reserveAddresses.length; i++) {
+    template['alloc'][utils.addHexPrefix(reserveAddresses[i])] = { balance: toWei(reserveAmount)};
   }
-  template['alloc'][VOTING_CONTRACT_ADDR].balance = "1000000000000000000000000000";
-  template['alloc'][GOVERNANCE_CONTRACT_ADDR].balance = "1000000000000000000000000000";
+
+  //DISTRIBUTE EXIMCHAIN ESCROW
+  let eximchainAddresses = uniq(EXIMCHAINESCROW.addresses);
+  let eximchainAmount = EXIMCHAINESCROWAMOUNT/eximchainAddresses.length
+  for(let i=0; i<eximchainAddresses.length; i++) {
+    template['alloc'][utils.addHexPrefix(eximchainAddresses[i])] = { balance: toWei(eximchainAmount)};
+  }
+
+  //DISTRIBUTE TOKENSWAP ESCROW
+  let tokenswapAddresses =  uniq(TOKENSWAPESCROW.addresses)
+  let shardedAmount = TOKENSWAPESCROWAMOUNT/tokenswapAddresses.length
+  for(let i=0; i<tokenswapAddresses.length; i++) {
+    template['alloc'][utils.addHexPrefix(tokenswapAddresses[i])] = { balance: toWei(shardedAmount)};
+  }
+
+  template['alloc'][VOTING_CONTRACT_ADDR].balance = "1";
+  template['alloc'][GOVERNANCE_CONTRACT_ADDR].balance = "1";
 }
 
 function setGasLimit(input) {
@@ -96,7 +146,7 @@ function loadConfig() {
 
   if (!json.owners || json.owners.length < 1 ) {
     // Default to using all validators as governance owners
-    json.owners = json.voters;
+    json.owners = uniq(json.voters.concat(RESERVEESCROW.addresses));
   }
 
   if (!json.fundedObservers) {
