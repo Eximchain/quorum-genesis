@@ -92,21 +92,21 @@ function fundAddresses(input) {
   let reserveAddresses = uniq(input.voters
     .concat(input.owners)
     .concat(RESERVEESCROW.addresses));
-  let reserveAmount = RESERVEESCROWAMOUNT/reserveAddresses.length
+  let reserveAmount = Math.ceil(RESERVEESCROWAMOUNT/reserveAddresses.length)
   for(let i=0; i<reserveAddresses.length; i++) {
     template['alloc'][utils.addHexPrefix(reserveAddresses[i])] = { balance: toWei(reserveAmount)};
   }
 
   //DISTRIBUTE EXIMCHAIN ESCROW
   let eximchainAddresses = uniq(EXIMCHAINESCROW.addresses);
-  let eximchainAmount = EXIMCHAINESCROWAMOUNT/eximchainAddresses.length
+  let eximchainAmount = Math.ceil(EXIMCHAINESCROWAMOUNT/eximchainAddresses.length)
   for(let i=0; i<eximchainAddresses.length; i++) {
     template['alloc'][utils.addHexPrefix(eximchainAddresses[i])] = { balance: toWei(eximchainAmount)};
   }
 
   //DISTRIBUTE TOKENSWAP ESCROW
   let tokenswapAddresses =  uniq(TOKENSWAPESCROW.addresses)
-  let shardedAmount = TOKENSWAPESCROWAMOUNT/tokenswapAddresses.length
+  let shardedAmount = Math.ceil(TOKENSWAPESCROWAMOUNT/tokenswapAddresses.length)
   for(let i=0; i<tokenswapAddresses.length; i++) {
     template['alloc'][utils.addHexPrefix(tokenswapAddresses[i])] = { balance: toWei(shardedAmount)};
   }
