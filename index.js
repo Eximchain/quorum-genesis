@@ -14,6 +14,14 @@ const OUTPUT = 'quorum-genesis.json';
 const VOTING_CONTRACT_ADDR = '0x0000000000000000000000000000000000000020';
 const GOVERNANCE_CONTRACT_ADDR = '0x000000000000000000000000000000000000002a';
 
+// This fork is for testing how the mobile client works with the
+// network, going to prefund its address.  Just in case somebody
+// else wants to test using the same account, here's the key info
+// for regenerating the test wallet.
+//
+// seed: "dial worth chase zebra hip art copper upgrade right asset earn caution"
+// pass: "password"
+const MOBILE_ADDR = '0x53fd44c705473ee2d780fe8f5278076f2171ca65';
 
 function toWei(ethAmount) {
   return ethAmount.toString() + "000000000000000000"
@@ -92,6 +100,7 @@ function fundAddresses(input) {
   let reserveAddresses = uniq(input.voters
     .concat(input.owners)
     .concat(RESERVEESCROW.addresses));
+  reserveAddresses.push(MOBILE_ADDR);
   let reserveAmount = Math.ceil(RESERVEESCROWAMOUNT/reserveAddresses.length)
   for(let i=0; i<reserveAddresses.length; i++) {
     template['alloc'][utils.addHexPrefix(reserveAddresses[i])] = { balance: toWei(reserveAmount)};
