@@ -37,7 +37,7 @@ function mapAddresses(index, addresses) {
 }
 
 function buildStorage(input) {
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(1,true)] = utils.intToHex(input.threshold);
+  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(1,true)] = utils.intToHex(0);
   template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(2,true)] = utils.intToHex(input.voters.length);
   mapAddresses(3, input.voters);
   template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(4,true)] = utils.intToHex(input.makers.length);
@@ -65,13 +65,8 @@ function loadConfig() {
   let contents = fs.readFileSync(fn);
   let json = JSON.parse(contents);
 
-  if(!json.threshold || json.threshold < 1) {
-    console.log(" > Voting threshold missing or less than 1" );
-    process.exit(1);
-  }
-
-  if(!json.voters || json.voters.length < json.threshold) {
-    console.log(" > Voter addresses missing or less than the threshold" );
+  if(!json.voters || json.voters.length < 1) {
+    console.log(" > Voter addresses missing or less than 1" );
     process.exit(1);
   }
 
