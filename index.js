@@ -65,14 +65,14 @@ function loadConfig() {
   let contents = fs.readFileSync(fn);
   let json = JSON.parse(contents);
 
-  if(!json.voters || json.voters.length < 1) {
-    console.log(" > Voter addresses missing or less than 1" );
-    process.exit(1);
-  }
-
   if(!json.makers || json.makers.length < 1) {
     console.log(" > BlockMaker addresses missing or less than 1" );
     process.exit(1);
+  }
+
+  if(!json.voters) {
+    // Voters no longer required
+    json.voters = [];
   }
 
   if(!json.fundedObservers) {
