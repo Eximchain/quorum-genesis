@@ -37,10 +37,10 @@ function mapAddresses(index, addresses) {
 }
 
 function buildStorage(input) {
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(1,true)] = utils.intToHex(input.threshold);
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(2,true)] = utils.intToHex(input.voters.length);
+  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(1,true)] = utils.addHexPrefix(utils.setLengthLeft([input.threshold], 1, false).toString('hex'));
+  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(2,true)] = utils.addHexPrefix(utils.setLengthLeft([input.voters.length], 1, false).toString('hex'));
   mapAddresses(3, input.voters);
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(4,true)] = utils.intToHex(input.makers.length);
+  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(4,true)] = utils.addHexPrefix(utils.setLengthLeft([input.makers.length], 1, false).toString('hex'));
   mapAddresses(5,input.makers);
 }
 
