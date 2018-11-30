@@ -45,10 +45,11 @@ function buildStorage(input) {
 }
 
 function fundAddresses(input) {
-  let all = input.voters.concat(input.makers.concat(input.fundedObservers.concat(['0x0000000000000000000000000000000000000020'])));
+  let all = input.voters.concat(input.makers.concat(input.fundedObservers));
   for(let i=0; i<all.length; i++) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
+  template['alloc']['0x0000000000000000000000000000000000000020'].balance = "0";
 }
 
 function setGasLimit(input) {
