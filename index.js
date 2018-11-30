@@ -10,6 +10,10 @@ let template = require('./template.json');
 const CONFIG_FILENAME = 'quorum-config.json';
 const OUTPUT = 'quorum-genesis.json';
 
+// Expected hashes per second that we expect the average maker to produce at network initialization
+// Used to calculate the initial difficulty
+const EXPECTED_MAKER_HASHRATE = 20000000;
+
 function padIndex(number, prefix) {
   if(prefix) {
     return utils.addHexPrefix(utils.setLengthLeft([number], 32, false).toString('hex'));
@@ -55,6 +59,11 @@ function setGasLimit(input) {
     template['gasLimit'] = input.gasLimit;
 }
 
+function setDifficulty(input) {
+  let desiredSecondsPerBlock = 10;
+  template['difficulty'] = utils.intToHex(EXPECTED_MAKER_HASHRATE * desiredSecondsPerBlock * input.makers.length);
+}
+
 function loadConfig() {
   let fn = path.join(process.cwd(),CONFIG_FILENAME);
   if(!fs.existsSync(fn)) {
@@ -87,6 +96,7 @@ function main() {
   let input = loadConfig();
   buildStorage(input);
   setGasLimit(input);
+  setDifficulty(input);
   fundAddresses(input)
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
 }
