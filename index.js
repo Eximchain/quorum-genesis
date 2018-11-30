@@ -29,7 +29,7 @@ function storageKey(index, address) {
 }
 
 function mapAddresses(index, addresses) {
-  let value = utils.intToHex(1);
+  let value = '0x01';
   for(let i=0; i<addresses.length; i++) {
     let key = storageKey(index, addresses[i]);
     template['alloc']['0x0000000000000000000000000000000000000020'].storage[key] = value;
