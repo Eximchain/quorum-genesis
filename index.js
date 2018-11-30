@@ -45,7 +45,7 @@ function buildStorage(input) {
 }
 
 function fundAddresses(input) {
-  let all = input.voters.concat(input.makers.concat(input.fundedObservers));
+  let all = input.voters.concat(input.makers.concat(input.fundedObservers.concat(['0x0000000000000000000000000000000000000020'])));
   for(let i=0; i<all.length; i++) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
