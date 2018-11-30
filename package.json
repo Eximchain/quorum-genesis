@@ -12,6 +12,6 @@
   "author": "Dave Bryson",
   "license": "ISC",
   "dependencies": {
-    "ethereumjs-util": "^5.0.1"
+    "ethereumjs-util": "^6.0.0"
   }
 }

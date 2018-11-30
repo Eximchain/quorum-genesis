@@ -24,7 +24,7 @@ function padAddress(address) {
 function storageKey(index, address) {
   let paddedAddress = padAddress(address);
   let paddedIndex = padIndex(index);
-  let result = utils.sha3(new Buffer(paddedAddress+paddedIndex, 'hex')).toString('hex');
+  let result = utils.keccak(new Buffer(paddedAddress+paddedIndex, 'hex')).toString('hex');
   return utils.addHexPrefix(result)
 }
 
