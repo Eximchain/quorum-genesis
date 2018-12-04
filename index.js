@@ -28,20 +28,25 @@ function storageKey(index, address) {
   return utils.addHexPrefix(result)
 }
 
-function mapAddresses(index, addresses) {
+function mapAddressesAt(alloc, index, addresses) {
   let value = '0x01';
   for(let i=0; i<addresses.length; i++) {
     let key = storageKey(index, addresses[i]);
-    template['alloc']['0x0000000000000000000000000000000000000020'].storage[key] = value;
+    template['alloc'][alloc].storage[key] = value;
   }
 }
 
-function buildStorage(input) {
+function buildGovernanceStorage(input){
+  mapAddressesAt('0x000000000000000000000000000000000000002A', 0, input.voters);
+  template['alloc']['0x000000000000000000000000000000000000002A'].storage[padIndex(1,true)] = utils.addHexPrefix(utils.setLengthLeft([input.voters.length], 1, false).toString('hex'));
+}
+
+function buildBlockVotingStorage(input) {
   template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(1,true)] = utils.addHexPrefix(utils.setLengthLeft([input.threshold], 1, false).toString('hex'));
   template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(2,true)] = utils.addHexPrefix(utils.setLengthLeft([input.voters.length], 1, false).toString('hex'));
-  mapAddresses(3, input.voters);
+  mapAddressesAt('0x0000000000000000000000000000000000000020', 3, input.voters);
   template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(4,true)] = utils.addHexPrefix(utils.setLengthLeft([input.makers.length], 1, false).toString('hex'));
-  mapAddresses(5,input.makers);
+  mapAddressesAt('0x0000000000000000000000000000000000000020', 5,input.makers);
 }
 
 function fundAddresses(input) {
@@ -91,7 +96,8 @@ function loadConfig() {
 
 function main() {
   let input = loadConfig();
-  buildStorage(input);
+  buildBlockVotingStorage(input);
+  buildGovernanceStorage(input);
   setGasLimit(input);
   fundAddresses(input)
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
