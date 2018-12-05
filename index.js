@@ -55,6 +55,7 @@ function fundAddresses(input) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
   template['alloc']['0x0000000000000000000000000000000000000020'].balance = "0";
+  template['alloc']['0x000000000000000000000000000000000000002A'].balance = "0";
 }
 
 function setGasLimit(input) {
