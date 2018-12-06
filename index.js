@@ -12,7 +12,7 @@ const OUTPUT = 'quorum-genesis.json';
 
 // Expected hashes per second that we expect the average maker to produce at network initialization
 // Used to calculate the initial difficulty
-const EXPECTED_MAKER_HASHRATE = 20000000;
+const EXPECTED_MAKER_HASHRATE = 50000;
 
 function padIndex(number, prefix) {
   if(prefix) {
