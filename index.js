@@ -9,6 +9,8 @@ let template = require('./template.json');
 
 const CONFIG_FILENAME = 'quorum-config.json';
 const OUTPUT = 'quorum-genesis.json';
+const BV_ADDR = '0x0000000000000000000000000000000000000020';
+const WEYL_ADDR = '0x000000000000000000000000000000000000002A';
 
 // Expected hashes per second that we expect the average maker to produce at network initialization
 // Used to calculate the initial difficulty
@@ -32,20 +34,25 @@ function storageKey(index, address) {
   return utils.addHexPrefix(result)
 }
 
-function mapAddresses(index, addresses) {
+function mapAddressesAt(alloc, index, addresses) {
   let value = '0x01';
   for(let i=0; i<addresses.length; i++) {
     let key = storageKey(index, addresses[i]);
-    template['alloc']['0x0000000000000000000000000000000000000020'].storage[key] = value;
+    template['alloc'][alloc].storage[key] = value;
   }
 }
 
-function buildStorage(input) {
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(1,true)] = utils.addHexPrefix(utils.setLengthLeft([0], 1, false).toString('hex'));
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(2,true)] = utils.addHexPrefix(utils.setLengthLeft([input.voters.length], 1, false).toString('hex'));
-  mapAddresses(3, input.voters);
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(4,true)] = utils.addHexPrefix(utils.setLengthLeft([input.makers.length], 1, false).toString('hex'));
-  mapAddresses(5,input.makers);
+function buildBlockVotingStorage(input) {
+  template['alloc'][BV_ADDR].storage[padIndex(1,true)] = utils.addHexPrefix(utils.setLengthLeft([0], 1, false).toString('hex'));
+  template['alloc'][BV_ADDR].storage[padIndex(2,true)] = utils.addHexPrefix(utils.setLengthLeft([input.voters.length], 1, false).toString('hex'));
+  mapAddressesAt(BV_ADDR, 3, input.voters);
+  template['alloc'][BV_ADDR].storage[padIndex(4,true)] = utils.addHexPrefix(utils.setLengthLeft([input.makers.length], 1, false).toString('hex'));
+  mapAddressesAt(BV_ADDR, 5,input.makers);
+}
+
+function buildGovernanceStorage(input){
+  mapAddressesAt(WEYL_ADDR, 0, input.voters);
+  template['alloc'][WEYL_ADDR].storage[padIndex(1, true)] = utils.addHexPrefix(utils.setLengthLeft([input.voters.length], 1, false).toString('hex'));
 }
 
 function fundAddresses(input) {
@@ -53,7 +60,8 @@ function fundAddresses(input) {
   for(let i=0; i<all.length; i++) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
-  template['alloc']['0x0000000000000000000000000000000000000020'].balance = "0";
+  template['alloc'][BV_ADDR].balance = '0';
+  template['alloc'][WEYL_ADDR].balance = '0'
 }
 
 function setGasLimit(input) {
@@ -95,7 +103,8 @@ function loadConfig() {
 
 function main() {
   let input = loadConfig();
-  buildStorage(input);
+  buildBlockVotingStorage(input);
+  buildGovernanceStorage(input);
   setGasLimit(input);
   setDifficulty(input);
   fundAddresses(input)
