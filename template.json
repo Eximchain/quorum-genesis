@@ -11,7 +11,14 @@
   },
   "coinbase": "0x0000000000000000000000000000000000000000",
   "config": {
-    "homesteadBlock": 0
+    "chainID" : "1",
+    "homesteadBlock": "0",
+    "eip150Block":    "0",
+    "eip155Block":    "0",
+    "eip158Block":    "0",
+    "eip160Block":    "0",
+    "byzantiumBlock": "0",
+    "DAOForkBlock":   "0"
   },
   "extraData": "0x",
   "mixhash": "0x00000000000000000000000000000000000000647572616c65787365646c6578",
