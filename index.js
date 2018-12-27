@@ -73,6 +73,10 @@ function setDifficulty(input) {
   template['difficulty'] = utils.intToHex(EXPECTED_MAKER_HASHRATE * desiredSecondsPerBlock * input.makers.length);
 }
 
+function setChainID(input) {
+  template['config']['chainID'] = input.chainID;
+}
+
 function loadConfig() {
   let fn = path.join(process.cwd(),CONFIG_FILENAME);
   if(!fs.existsSync(fn)) {
@@ -85,6 +89,11 @@ function loadConfig() {
 
   if(!json.makers || json.makers.length < 1) {
     console.log(" > BlockMaker addresses missing or less than 1" );
+    process.exit(1);
+  }
+
+  if(!json.chainID) {
+    console.log(" > chainID not found in config");
     process.exit(1);
   }
 
@@ -107,6 +116,7 @@ function main() {
   buildGovernanceStorage(input);
   setGasLimit(input);
   setDifficulty(input);
+  setChainID(input);
   fundAddresses(input)
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
 }
