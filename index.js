@@ -5,12 +5,15 @@
 const fs = require('fs');
 const path = require('path');
 const utils = require('ethereumjs-util');
+const merge = require('lodash.merge');
+const BigNum = require('bignumber.js');
 let template = require('./template.json');
-
+const saleAddresses = require('./eximSaleInput.json');
 const CONFIG_FILENAME = 'quorum-config.json';
 const OUTPUT = 'quorum-genesis.json';
 const BV_ADDR = '0x0000000000000000000000000000000000000020';
 const WEYL_ADDR = '0x000000000000000000000000000000000000002A';
+const REMAINDER_ADDR = '0x9153A2a04cc57B486AB82bC0bE341DCa367B7934';
 
 // Expected hashes per second that we expect the average maker to produce at network initialization
 // Used to calculate the initial difficulty
@@ -56,12 +59,16 @@ function buildGovernanceStorage(input){
 }
 
 function fundAddresses(input) {
-  let all = input.voters.concat(input.makers.concat(input.fundedObservers));
-  for(let i=0; i<all.length; i++) {
-    template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
-  }
+  let allocatedBalance = new BigNum(0);
   template['alloc'][BV_ADDR].balance = '0';
   template['alloc'][WEYL_ADDR].balance = '0'
+  template = merge(template, saleAddresses);
+  for (var addr in template.alloc){
+    if (template.alloc[addr].balance) allocatedBalance = allocatedBalance.plus(new BigNum(template.alloc[addr].balance))
+  }
+  const remainderVal = new BigNum(150000000).shiftedBy(18).minus(allocatedBalance)
+  console.log(`Found we had allocated ${allocatedBalance.shiftedBy(-18).toString()} EXC, putting remaining ${remainderVal.shiftedBy(-18).toString()} into REMAINDER_ADDR.`)
+  template.alloc[REMAINDER_ADDR] = remainderVal;
 }
 
 function setGasLimit(input) {
@@ -107,7 +114,8 @@ function main() {
   buildGovernanceStorage(input);
   setGasLimit(input);
   setDifficulty(input);
-  fundAddresses(input)
+  fundAddresses(input);
+  input = merge(input, saleAddresses);
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
 }
 

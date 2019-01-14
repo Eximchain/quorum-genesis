@@ -4,7 +4,7 @@
   "description": "Simple utility to create a genesis file for Quorum",
   "main": "index.js",
   "bin": {
-    "quorum-genesis" : "./index.js"
+    "quorum-genesis": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +12,8 @@
   "author": "Dave Bryson",
   "license": "ISC",
   "dependencies": {
-    "ethereumjs-util": "^5.0.1"
+    "bignumber.js": "^8.0.2",
+    "ethereumjs-util": "^5.0.1",
+    "lodash.merge": "^4.6.1"
   }
 }
