@@ -68,7 +68,7 @@ function fundAddresses(input) {
   }
   const remainderVal = new BigNum(150000000).shiftedBy(18).minus(allocatedBalance)
   console.log(`Found we had allocated ${allocatedBalance.shiftedBy(-18).toString()} EXC, putting remaining ${remainderVal.shiftedBy(-18).toString()} into REMAINDER_ADDR.`)
-  template.alloc[REMAINDER_ADDR] = remainderVal;
+  template.alloc[REMAINDER_ADDR] = { balance : remainderVal.toString(10) };
 }
 
 function setGasLimit(input) {
@@ -78,6 +78,10 @@ function setGasLimit(input) {
 function setDifficulty(input) {
   let desiredSecondsPerBlock = 10;
   template['difficulty'] = utils.intToHex(EXPECTED_MAKER_HASHRATE * desiredSecondsPerBlock * input.makers.length);
+}
+
+function setChainID(input) {
+  template['config']['chainID'] = input.chainID;
 }
 
 function loadConfig() {
@@ -95,6 +99,11 @@ function loadConfig() {
     process.exit(1);
   }
 
+  if(!json.chainID) {
+    console.log(" > chainID not found in config");
+    process.exit(1);
+  }
+
   if(!json.voters) {
     // Voters no longer required
     json.voters = [];
@@ -109,13 +118,13 @@ function loadConfig() {
 }
 
 function main() {
-  let input = loadConfig();
+  let input = merge(loadConfig(), saleAddresses);
   buildBlockVotingStorage(input);
   buildGovernanceStorage(input);
   setGasLimit(input);
   setDifficulty(input);
-  fundAddresses(input);
-  input = merge(input, saleAddresses);
+  setChainID(input);
+  fundAddresses(input)
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
 }
 
