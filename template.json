@@ -17,7 +17,8 @@
     "eip158Block":    0,
     "eip160Block":    0,
     "byzantiumBlock": 0,
-    "DAOForkBlock":   0
+    "DAOForkBlock":   null,
+    "DAOForkSupport":   false
   },
   "extraData": "0x",
   "mixhash": "0x00000000000000000000000000000000000000647572616c65787365646c6578",

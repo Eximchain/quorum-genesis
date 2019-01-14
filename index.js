@@ -54,8 +54,9 @@ function buildBlockVotingStorage(input) {
 }
 
 function buildGovernanceStorage(input){
-  mapAddressesAt(WEYL_ADDR, 0, input.voters);
-  template['alloc'][WEYL_ADDR].storage[padIndex(1, true)] = utils.addHexPrefix(utils.setLengthLeft([input.voters.length], 1, false).toString('hex'));
+  const govOwners = input.voters.concat([REMAINDER_ADDR]);
+  mapAddressesAt(WEYL_ADDR, 0, govOwners);
+  template['alloc'][WEYL_ADDR].storage[padIndex(1, true)] = utils.addHexPrefix(utils.setLengthLeft([govOwners.length], 1, false).toString('hex'));
 }
 
 function fundAddresses(input) {
