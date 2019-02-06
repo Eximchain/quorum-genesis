@@ -5,10 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const utils = require('ethereumjs-util');
-const merge = require('lodash.merge');
-const BigNum = require('bignumber.js');
 let template = require('./template.json');
-const saleAddresses = require('./eximSaleInput.json');
 const CONFIG_FILENAME = 'quorum-config.json';
 const OUTPUT = 'quorum-genesis.json';
 const BV_ADDR = '0x0000000000000000000000000000000000000020';
@@ -60,16 +57,12 @@ function buildGovernanceStorage(input){
 }
 
 function fundAddresses(input) {
-  let allocatedBalance = new BigNum(0);
   template['alloc'][BV_ADDR].balance = '0';
   template['alloc'][WEYL_ADDR].balance = '0'
-  template = merge(template, saleAddresses);
-  for (var addr in template.alloc){
-    if (template.alloc[addr].balance) allocatedBalance = allocatedBalance.plus(new BigNum(template.alloc[addr].balance))
+  let all = input.voters.concat(input.makers.concat(input.fundedObservers));
+  for(let i=0; i<all.length; i++) {
+    template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
-  const remainderVal = new BigNum(150000000).shiftedBy(18).minus(allocatedBalance)
-  console.log(`Found we had allocated ${allocatedBalance.shiftedBy(-18).toString()} EXC, putting remaining ${remainderVal.shiftedBy(-18).toString()} into REMAINDER_ADDR.`)
-  template.alloc[REMAINDER_ADDR] = { balance : remainderVal.toString(10) };
 }
 
 function setGasLimit(input) {
@@ -119,7 +112,7 @@ function loadConfig() {
 }
 
 function main() {
-  let input = merge(loadConfig(), saleAddresses);
+  let input = loadConfig();
   buildBlockVotingStorage(input);
   buildGovernanceStorage(input);
   setGasLimit(input);
