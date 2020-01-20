@@ -55,7 +55,7 @@ contract WeylExample {
 }
 ```
 
-The first state variable is a uint, or more importantly, a simple [Value Type](https://solidity.readthedocs.io/en/v0.4.24/types.html#value-types).  Its key in the storage object will be `0`, but converted into a padded hex string: `0x0...0`.  Its uint value is stored as an un-padded, `0x`-prefixed hex string, so with one owner, the Weyl contract's storage shape starts out like this: 
+The first state variable is a uint, or more importantly, a simple [Value Type](https://solidity.readthedocs.io/en/v0.4.24/types.html#value-types).  Its key in the storage object will be `0` -- state variables are zero-indexed -- but converted into a padded hex string: `0x0...0`.  Its uint value is stored as an un-padded, `0x`-prefixed hex string, so with one owner, the Weyl contract's storage shape starts out like this: 
 
 ```
 {
@@ -76,7 +76,11 @@ The second state variable is a [Mapping](https://solidity.readthedocs.io/en/v0.4
 2. Make a hex Buffer which is the address followed by the index.
 3. Return the `sha3` hash of this Buffer as a `0x`-prefixed hex string.
 
-The ValueTypes within the map are stored the same way.  Put this all together, and in the one-owner case, you end up with the following `storage` object:
+Written in pseudocode, setting one address key in a map to `true` looks something like:
+```
+storage[ '0x' + sha3( pad(addressKey) + pad(mapIndex) )] = '0x1';
+```
+Where `addressKey` is the key on the map and `mapIndex` is that map's index in the list of state variables as declared in the sourcecode (in the sample case, `mapIndex = 1`).  Put this all together, and in the one-owner case, you end up with the following `storage` object:
 
 ```
 {
@@ -86,7 +90,13 @@ The ValueTypes within the map are stored the same way.  Put this all together, a
   }
 }
 ```
-
 Similar procedures are used for initializing arrays, except with array indices instead of map keys.  
 
 Make sure to do extensive tests with any new genesis block, as misformatted memory will make functions return garbage values.  This script is only responsible for setting the variables shown above.  If we wanted to import governance history into a new genesis block, we would also need to set initial values for the other assorted state variables.
+
+So We Want to Hardfork...
+---
+
+The syntax described above was all we needed to know when we were initializing the BlockVoting & EximGov contracts.  The mappings we needed to set only stored booleans, but we have some mappings which store structs.  If we wanted to do a hard fork where we imported the full current state of the governance contract, we'd need to do research on how those are represented.
+
+One strategy to rebuild `storage` would be manually querying all of the locations where there are values.  `web3` provides a function to fetch the value at any specific index.  In practice, this means we would need to calculate all `map` and `array` indices ourselves, potentially using the transaction history, and then fetch the value stored in each one.  It's technically possible, but a significant amount of legwork on our end.  Definitely worth thinking through whether we really need to import *all* of this contract's historical state.
